@@ -1,0 +1,24 @@
+name: cprox
+version: 0.1.0
+
+authors:
+  - Aaron Schlesinger <aaron@ecomaz.net>
+
+targets:
+  cprox:
+    main: src/cprox.cr
+
+dependencies:
+  # https://kemalcr.com/
+  kemal:
+    github: kemalcr/kemal
+  # https://github.com/CodeSteak/Nuummite
+  nuummite:
+    github: codesteak/nuummite
+    version: ~> 0.1.4
+  
+    
+
+crystal: 0.33.0
+
+license: MIT
