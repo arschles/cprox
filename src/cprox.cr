@@ -1,13 +1,6 @@
 require "kemal"
 require "nuummite"
 
-# TODO: Write documentation for `Cprox`
-
-def get_code(env)
-  env.params.url["code"]
-end
-
-
 module Cprox
   db = Nuummite.new(".", "cprox.db")
 
@@ -22,32 +15,36 @@ module Cprox
   end
 
   get "/forward/:code" do |env|
-    url_code = get_code(env)
-    begin
-      url = db[url_code]
-      env.redirect url
-    rescue
-      "Code #{url_code} not found"
+    url_code = env.params.url["code"]?
+    if !url_code.nil?
+      url = db[url_code]?
+      if !url.nil?
+        env.redirect url 
+      else
+        "Code #{url_code} isn't registered"
+      end
+    else
+      "Url code not found"
     end
   end
 
   post "/code/:code" do |env|
-    url_code = get_code(env)
-    begin
-      url = env.params.json["url"].as(String)
-      db[url_code] = url
-      "registered code #{url_code} for #{url}"
-    rescue
-      "Code #{url_code} not found"
-    end
+    url_code = env.params.url["code"]?
+    halt env, status_code: 401, response: "No URL code found in path" if url_code.nil?
+    url = env.params.json["url"]?
+    halt env,
+      status_code: 401,
+      response: "No URL found in JSON" if url.nil?
+    db[url_code] = url
+    ""
   end
 
   delete "/code/:code" do |env|
-    begin
-      url_code = get_code(env)
+    url_code = env.params.url["code"]?
+    if !url_code.nil?
       db.delete(url_code)
       "deleted code #{url_code}"
-    rescue
+    else
       "Code #{url_code} not found"
     end
   end
