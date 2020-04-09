@@ -1,5 +1,6 @@
 require "kemal"
 require "nuummite"
+require "./option"
 
 module Cprox
   db = Nuummite.new(".", "cprox.db")
@@ -29,26 +30,22 @@ module Cprox
   end
 
   post "/code/:code" do |env|
-    url_code: String | Nil = env.params.url["code"]?
-    if url_code.nil?
-      halt env,
-        status_code: 401,
-        response: "No URL code found in path"
-    else
+    resp: Option = Option.new(env.params.url["code"]) {|code| 
       url_any = env.params.json["url"]
       if !url_any.is_a?(String)
-        halt env,
-          status_code: 401,
-          response: "URL must be a string"
+        {"url_no_string", 401}
       elsif url_any.nil?
-        halt env,
-          status_code: 401,
-          response: "URL must not be nil"
+        {"url_nil", 401}
       else
         url = url_any.as(String)
-        db[url_code] = url
+        {code, url}
       end
-    end
+    }
+    if resp.is_a?(Option(Nil))
+    if resp.is_a?(Tuple)
+      halt env, status_code: resp[1], response: resp[0]
+    else
+      db[resp]
   end
 
   delete "/code/:code" do |env|
