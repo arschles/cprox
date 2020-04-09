@@ -1,8 +1,8 @@
-class Option(T)
+class Object(T)
     def initialize(@var : T | Nil)
     end
 
-    def map(block : T -> U) : Option(U)
+    def map(block : T -> U) : Option(U) forall U
         if @var.nil?
             return Option.new(nil)
         else

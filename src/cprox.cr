@@ -29,14 +29,26 @@ module Cprox
   end
 
   post "/code/:code" do |env|
-    url_code = env.params.url["code"]?
-    halt env, status_code: 401, response: "No URL code found in path" if url_code.nil?
-    url = env.params.json["url"]?
-    halt env,
-      status_code: 401,
-      response: "No URL found in JSON" if url.nil?
-    db[url_code] = url
-    ""
+    url_code: String | Nil = env.params.url["code"]?
+    if url_code.nil?
+      halt env,
+        status_code: 401,
+        response: "No URL code found in path"
+    else
+      url_any = env.params.json["url"]
+      if !url_any.is_a?(String)
+        halt env,
+          status_code: 401,
+          response: "URL must be a string"
+      elsif url_any.nil?
+        halt env,
+          status_code: 401,
+          response: "URL must not be nil"
+      else
+        url = url_any.as(String)
+        db[url_code] = url
+      end
+    end
   end
 
   delete "/code/:code" do |env|
