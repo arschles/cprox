@@ -42,42 +42,26 @@ module Cprox
   end
 
   post "/code/:code" do |env|
-    begin
-      json_not_found = JSONException.new message: "url not found in JSON", code: 401
-      json_not_string = JSONException.new message: "URL is not a string", code: 401
-      body_io : IO | Nil = env.request.body
-      url : String = Result.new(body_io).map { |val|
-        # get the entire body
-        val.gets_to_end
-      }.map { |val|  
-        parser = JSON::Parser.new(val)
-        any = parser.parse()
-      }.flat_map {|val|
-        # check for nil
-        if val.nil?
-          Err.new json_not_found
-        else
-          Ok.new val
-        end
-      }.flat_map { |val|
-        # check for whether it's a string
-        begin
-          Ok.new(val.as(String))
-        rescue
-          Err.new(json_not_string)
-        end
-      }
-      url_code = Result.new(env.params.url["code"]?).or_raise(
-        PathVarNotFound.new message: "code not found in URL",
-          code: 401
-      )
-
-      db[url_code] = url
-      "Ok"
-    rescue e : JSONException | PathVarNotFound
-      halt env, status_code: e.code, response: e.code
+    code = env.params.url["code"]
+    post_body = env.request.body
+    if post_body.nil?
+      halt env, status_code: 400, response: "no POST body"
+    elsif code.nil?
+      halt env, status_code: 400, response: "No URL in path"
     else
-      halt env, status_code: 500, response: "Unknown error"
+      parser = JSON::Parser.new(post_body)
+      json_any = parser.parse()
+      url = json_any["url"]?
+      if url.nil?
+        halt env, status_code: 400, response: "No URL in JSON body"
+      else
+        begin
+          url = url.as_s
+          db[code] = url
+        rescue
+          halt env, status_code: 400, response: "URL was not a string"
+        end
+      end
     end
   end
 

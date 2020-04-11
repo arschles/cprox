@@ -1,18 +1,6 @@
 require "./option"
 
 module Cprox
-    class Ok(T, U)
-        def initialize(@val : T) : Result(T, U) forall T, U
-            Result.new(@val)
-        end
-    end
-
-    class Err(T, U)
-        def initialize(u : U) : Result(T, U) forall T, U
-            Result.new(e)
-        end
-    end
-
     class Result(T, U)
         def initialize(@val : T | U)
         end
@@ -50,10 +38,13 @@ module Cprox
         # return a result with the new value in it
         def map(&block : T -> V) : Result(V, U) forall V
             if @val.is_a?(U)
-                self
+                ret : Result(V, U) = self.as(Result(V, U))
+                ret
             else
-                new_val : V = block.call(@val)
-                Ok.new(new_val)
+                to_call_with: T = @val.as(T)
+                new_val : V | Nil = block.call(to_call_with)
+                other_ret : Result(V, U) = Result.new(new_val)
+                other_ret
             end
         end
 
