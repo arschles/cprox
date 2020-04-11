@@ -1,7 +1,7 @@
 module Cprox
     class Some(T)
-        def initialize(@var : T) : Option(T)
-            Option.new(@var)
+        def initialize(@val : T) : Option(T)
+            Option.new(@val)
         end
     end
 
@@ -12,7 +12,23 @@ module Cprox
     end
 
     class Option(T)
-        def initialize(@var : T | Nil)
+        def initialize(@val : T | Nil)
+        end
+
+        def zip(other : Option(U)) : Option(Tuple(T, U)) forall U
+            other_val = -> {
+                other.unwrap(Exception.new "shouldn't get here")
+            }
+            if @val.nil?
+                Option.new(Nil).as Option(Tuple(T, U))
+            elsif other.empty?
+                Option.new(Nil).as Option(Tuple(T, U))
+            else
+                Option.new({
+                    @val,
+                    other_val.call
+                }).as Option(Tuple(T, U))
+            end
         end
 
         def map(&block: T -> U) : Option(U) forall U
@@ -32,6 +48,14 @@ module Cprox
             end
         end
 
+        def unwrap(ex : Exception)
+            if @val.nil?
+                raise ex
+            else
+                @val
+            end
+        end
+
         def if_full(&full: T -> U) forall U
             if @val.nil?
             else
@@ -43,6 +67,10 @@ module Cprox
             if @val.nil?
                 yield
             end
+        end
+
+        def empty?
+            return @val.nil?
         end
     end
 end

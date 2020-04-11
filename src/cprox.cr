@@ -44,6 +44,7 @@ module Cprox
   post "/code/:code" do |env|
     code = env.params.url["code"]
     post_body = env.request.body
+
     if post_body.nil?
       halt env, status_code: 400, response: "no POST body"
     elsif code.nil?
