@@ -22,8 +22,22 @@ module Cprox
   puts "This is cprox version #{VERSION}"
   
   get "/" do
+    key_value_pairs = [] of {String, String}
     db.each do |key, value|
-      "#{key} ==> #{value}"
+      key_value_pairs << {key, value}
+    end
+    render "src/views/index.ecr"
+  end
+
+  post "/addurl" do |env|
+    url = env.params.body["url"]?
+    url_code = env.params.body["code"]?
+
+    if !url_code.nil? && !url.nil?
+      db[url_code.as(String)] = url.as(String)
+      env.redirect "/"
+    else
+      "URL code or URL was missing"
     end
   end
 
