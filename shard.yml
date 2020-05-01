@@ -12,6 +12,9 @@ dependencies:
   # https://kemalcr.com/
   kemal:
     github: kemalcr/kemal
+  spec-kemal:
+    github: kemalcr/spec-kemal
+  
   # https://github.com/CodeSteak/Nuummite
   nuummite:
     github: codesteak/nuummite

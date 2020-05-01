@@ -1,2 +1,3 @@
 require "spec"
-# require "../src/cprox"
+require "spec-kemal"
+require "../src/cprox"

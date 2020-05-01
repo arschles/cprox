@@ -5,6 +5,10 @@ require "./result"
 require "json"
 require "./get_kvps"
 require "./url_and_code"
+require "./db"
+
+dbInstance = DB.new
+db = dbInstance.getDB
 
 module Cprox
   class PathVarNotFound < Exception
@@ -17,8 +21,6 @@ module Cprox
     end
   end
 
-  db = Nuummite.new(".", "cprox.db")
-
   VERSION = "0.1.0"
 
   puts "This is cprox version #{VERSION}"
@@ -26,6 +28,20 @@ module Cprox
   get "/" do
     key_value_pairs = get_kvps(db)
     render "src/views/index.ecr"
+  end
+
+  get "/search/:code" do |env|
+    code : String | Nil = env.params.url["code"]?
+    if code.nil?
+      halt env, status_code: 400, response: "URL code was missing"
+    else
+      url : String | Nil = db[code]?
+      if url.nil?
+        halt env, status_code: 404, response: "Code #{code} not found"
+      else
+        url
+      end
+    end
   end
 
   post "/addurl" do |env|
