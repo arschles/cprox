@@ -27,7 +27,7 @@ describe "get_kvps" do
   end
 end
 
-describe "get_url_and_code"
+describe "get_url_and_code" do
   it "gets a string url and a string url code" do
     # mock_env = MockEnv.new("someurl.com", "some_code")
     # get_url_and_code(mock_env).should eq {"someurl.com", "some_code"}
