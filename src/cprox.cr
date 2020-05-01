@@ -3,6 +3,8 @@ require "nuummite"
 require "./option"
 require "./result"
 require "json"
+require "./get_kvps"
+require "./url_and_code"
 
 module Cprox
   class PathVarNotFound < Exception
@@ -22,22 +24,21 @@ module Cprox
   puts "This is cprox version #{VERSION}"
   
   get "/" do
-    key_value_pairs = [] of {String, String}
-    db.each do |key, value|
-      key_value_pairs << {key, value}
-    end
+    key_value_pairs = get_kvps(db)
     render "src/views/index.ecr"
   end
 
   post "/addurl" do |env|
-    url = env.params.body["url"]?
-    url_code = env.params.body["code"]?
+    strings : Tuple(String, String) | Nil = get_url_and_code(env)
 
-    if !url_code.nil? && !url.nil?
-      db[url_code.as(String)] = url.as(String)
-      env.redirect "/"
-    else
+    if strings.nil?
       "URL code or URL was missing"
+    else
+      url = strings[0]
+      url_code = strings[1]
+      # url, url_code = strings
+      db[url_code] = url
+      env.redirect "/"
     end
   end
 
