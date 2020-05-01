@@ -16,4 +16,4 @@ describe "search" do
         get "/search/noexist"
         response.status_code.should eq 404
     end
-  end
+end

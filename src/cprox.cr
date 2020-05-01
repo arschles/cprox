@@ -30,6 +30,11 @@ module Cprox
     render "src/views/index.ecr"
   end
 
+  get "/search_form" do |env|
+    # TODO: get URL code from query string
+    # and then look it up and return it
+  end
+  
   get "/search/:code" do |env|
     code : String | Nil = env.params.url["code"]?
     if code.nil?
